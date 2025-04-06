@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { listEmployees } from '../services/EmployeeService';
+import { deleteEmployee, listEmployees } from '../services/EmployeeService';
 import { useNavigate } from 'react-router-dom';
 
 const ListEmployeeComponent = () => {
@@ -8,17 +8,34 @@ const ListEmployeeComponent = () => {
 
     const navigator = useNavigate();
 
-    useEffect(() => {
+    function addNewEmployee() {
+        navigator('/add-employee');
+    }
+
+    function updateEmployee(id) {
+        navigator(`/update-employee/${id}`);
+    }
+
+    function getAllEmployees() {
         listEmployees().then((response) => {
             setEmployees(response.data);
         }).catch((error) => {
             console.error("Error fetching employee data", error);
         })
-    })
-
-    function addNewEmployee() {
-        navigator('/add-employee');
     }
+
+    function delEmployee(id) {
+        deleteEmployee(id).then(() => {
+            getAllEmployees();
+        }
+        ).catch((error) => {
+            console.error("Error deleting employee", error);
+        })
+    }
+
+    useEffect(() => {
+        getAllEmployees();
+    }, []);
 
     return (
         <div className='container'>
@@ -31,6 +48,7 @@ const ListEmployeeComponent = () => {
                         <th>Last Name</th>
                         <th>Fisrt Name</th>
                         <th>Email</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
 
@@ -42,6 +60,10 @@ const ListEmployeeComponent = () => {
                                 <td>{employee.lastName}</td>
                                 <td>{employee.firstName}</td>
                                 <td>{employee.email}</td>
+                                <td>
+                                    <button className="btn btn-info" onClick={() => updateEmployee(employee.id)}>Update</button>
+                                    <button className="btn btn-danger ms-2" onClick={() => delEmployee(employee.id)}>Delete</button>
+                                </td>
                             </tr>
                         ))
                     }
